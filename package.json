@@ -1,8 +1,8 @@
 {
-  "name": "datastore-azure",
-  "version": "1.0.0",
-  "description": "Datastore implementation backed by azure storage",
-  "repository": "https://github.com/sylar217/js-datastore-azure",
+  "name": "sidetree-ipfs-datastore",
+  "version": "0.1.0",
+  "description": "Implementations of IPFS datastore used by sidetree-ipfs microservice",
+  "repository": "https://github.com/decentralized-identity/sidetree-ipfs-datastores",
   "main": "dist/src/index.js",
   "scripts": {
     "test": "jasmine-ts --config=./test/jasmine.json",
@@ -11,8 +11,7 @@
   },
   "keywords": [
     "ipfs",
-    "datastore",
-    "azure"
+    "datastore"
   ],
   "dependencies": {
     "async": "^2.6.1",
@@ -43,5 +42,5 @@
     "typescript": "^3.0.3"
   },
   "author": "",
-  "license": "MIT"
+  "license": "Apache-2.0"
 }
