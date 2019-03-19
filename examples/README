@@ -1,0 +1,15 @@
+Azure Blob Repo
+======
+
+This example leverages the code from https://github.com/ipfs/js-ipfs/tree/master/examples/ipfs-101,
+but uses an instantiated Azure blob service container instance to serve as the entire backend for ipfs.
+
+## Running
+Update the env file with Azure Storage Connection String:
+
+Once the Blob Service instance has its needed data, you can run the example:
+```
+npm install
+npm run build
+npm start
+```

@@ -1,0 +1,25 @@
+{
+    "name": "full-azure-repo",
+    "version": "1.0.0",
+    "description": "Use azure data store in IPFS",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "build": "tsc -p .",
+        "start": "node dist/index"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "MIT",
+    "dependencies": {
+        "azure-storage": "^2.10.2",
+        "datastore-azure": "../",
+        "dotenv": "^5.0.0",
+        "ipfs": "~0.32.3",
+        "ipfs-repo": "^0.26.2"
+    },
+    "devDependencies": {
+        "@types/node": "^10.3.1",
+        "typescript": "^2.9.1"
+    }
+}

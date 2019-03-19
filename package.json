@@ -1,0 +1,47 @@
+{
+  "name": "datastore-azure",
+  "version": "1.0.0",
+  "description": "Datastore implementation backed by azure storage",
+  "repository": "https://github.com/sylar217/js-datastore-azure",
+  "main": "dist/src/index.js",
+  "scripts": {
+    "test": "jasmine-ts --config=./test/jasmine.json",
+    "build": "tsc -p .",
+    "lint": "tslint --fix --project ."
+  },
+  "keywords": [
+    "ipfs",
+    "datastore",
+    "azure"
+  ],
+  "dependencies": {
+    "async": "^2.6.1",
+    "@azure/storage-blob": "^10.3.0",
+    "azure-storage": "^2.10.2",
+    "datastore-core": "~0.6.0",
+    "fs": "0.0.1-security",
+    "interface-datastore": "~0.6.0",
+    "pull-defer": "~0.2.3",
+    "pull-stream": "^3.6.9",
+    "upath": "^1.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^10.3.1",
+    "@types/jasmine": "^2.8.8",
+    "chai": "^4.1.2",
+    "dirty-chai": "^2.0.1",
+    "jasmine": "^3.1.0",
+    "jasmine-reporters": "^2.3.2",
+    "jasmine-spec-reporter": "^4.2.1",
+    "jasmine-ts": "^0.2.1",
+    "nyc": "^13.3.0",
+    "stand-in": "^4.2.0",
+    "tslint": "^5.11.0",
+    "tslint-config-standard": "^8.0.1",
+    "@types/dotenv": "^4.0.3",
+    "dotenv": "^6.0.0",
+    "typescript": "^3.0.3"
+  },
+  "author": "",
+  "license": "MIT"
+}
