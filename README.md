@@ -1,5 +1,5 @@
-# js-datastore-azure
-Datastore implementation backed by azure storage
+# sidetree-ipfs-datastores
+Implementations of IPFS datastore used by sidetree-ipfs microservice.
 
 Use examples folder:
 - Replace the storage connection string in the .env file located in the root folder
