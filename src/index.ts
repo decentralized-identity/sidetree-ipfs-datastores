@@ -1,5 +1,5 @@
 import { BlobService } from 'azure-storage';
-var fs = require('fs');
+let fs = require('fs');
 const setImmediate = require('async/setImmediate');
 const each = require('async/each');
 const waterfall = require('async/series');
@@ -18,8 +18,11 @@ const pull = require('pull-stream');
  * Structure for input params for Azure Data store
  */
 export type AzureDSInputOptions = {
+  /** A client for Azure Blob Service. */
   blob: BlobService,
+  /** Name of blob container. */
   containerName: string,
+  /** TODO: Issue #1 - Remove this property. */
   createIfMissing?: boolean
 };
 
@@ -45,7 +48,7 @@ export class AzureDataStore {
     this.container = opts.containerName;
     this.createIfMissing = opts.createIfMissing === undefined ? false : opts.createIfMissing;
 
-    this.opts.blob.doesContainerExist(this.container, (error, result, response) => {
+    this.opts.blob.doesContainerExist(this.container, (_error, result, response) => {
       if (result.exists === false) {
         throw new Error('Container doesnt exists');
       }
@@ -117,7 +120,7 @@ export class AzureDataStore {
    * @param callback
    */
   public put (key: any, val: Buffer, callback: any): void {
-    // const options : BlobService.CreateBlobRequestOptions = { 
+    // const options : BlobService.CreateBlobRequestOptions = {
     //   contentSettings: {
     //     contentEncoding: 'utf-8',
     //     contentType: 'text/plain'
@@ -139,19 +142,18 @@ export class AzureDataStore {
    */
   public get (key: any, callback: any): void {
     const chunks = [];
-    var writeStream = fs.createWriteStream('azureBlob.txt');
+    let writeStream = fs.createWriteStream('azureBlob.txt');
 
     writeStream.on('finish', () => {
-      fs.readFile('azureBlob.txt', (err, data) => {
-        if (data)
-        {
+      fs.readFile('azureBlob.txt', (_err, data) => {
+        if (data) {
           return callback(null, Buffer.from(data));
-        } 
+        }
       });
     });
 
     this.opts.blob.getBlobToStream(this.container, this.getFullKey(key), writeStream, (err, result, response) => {
-      if (err && err.message === 'NotFound') {  
+      if (err && err.message === 'NotFound') {
         return callback(Errors.notFoundError(err));
       } else if (err) {
         return callback(err);
@@ -161,8 +163,8 @@ export class AzureDataStore {
 
   /**
    * Read content from azure blob storage.
-   * @param key 
-   * @param callback 
+   * @param key
+   * @param callback
    */
 //   public get (key: any, callback: any): void {
 //     this.opts.blob.getBlobToText(this.container, this.getFullKey(key), { disableContentMD5Validation: true}, (err, text, result, response) => {
