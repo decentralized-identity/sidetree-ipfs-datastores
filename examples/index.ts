@@ -64,7 +64,7 @@ blobService.createContainerIfNotExists(containerName, err => {
       })
       // Once we have the version, let's add a file to IPFS
       .then(() => {
-        return node.files.add({
+        return node.add({
           path: 'data.txt',
           content: Buffer.from(require('crypto').randomBytes(1024 * 25))
         });
@@ -72,7 +72,7 @@ blobService.createContainerIfNotExists(containerName, err => {
       // Log out the added files metadata and cat the file from IPFS
       .then((filesAdded: any) => {
         console.log('\nAdded file:', filesAdded[0].path, filesAdded[0].hash);
-        return node.files.cat(filesAdded[0].hash);
+        return node.cat(filesAdded[0].hash);
       })
       // Print out the files contents to console
       .then((data: any) => {

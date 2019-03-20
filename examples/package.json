@@ -16,13 +16,13 @@
         "azure-storage": "^2.10.2",
         "datastore-azure": "../",
         "dotenv": "^5.0.0",
-        "ipfs": "~0.32.3",
+        "ipfs": "^0.34.4",
         "ipfs-repo": "^0.26.2"
     },
     "devDependencies": {
-        "@types/node": "^10.3.1",
+        "@types/node": "^10.12.10",
         "tslint": "^5.11.0",
         "tslint-config-standard": "^8.0.1",
-        "typescript": "^2.9.1"
+        "typescript": "^2.9.2"
     }
 }
