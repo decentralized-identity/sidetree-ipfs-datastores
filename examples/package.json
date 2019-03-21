@@ -17,7 +17,8 @@
         "datastore-azure": "../",
         "dotenv": "^5.0.0",
         "ipfs": "^0.34.4",
-        "ipfs-repo": "^0.26.2"
+        "ipfs-repo": "^0.26.2",
+        "uuid": "^3.3.2"
     },
     "devDependencies": {
         "@types/node": "^10.12.10",

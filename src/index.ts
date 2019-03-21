@@ -1,4 +1,7 @@
 import { BlobService } from 'azure-storage';
+import WMStream  from './WMStream';
+import { Writable } from 'stream';
+import { write } from 'fs';
 let fs = require('fs');
 const setImmediate = require('async/setImmediate');
 const each = require('async/each');
@@ -13,6 +16,7 @@ const Errors = iDatastore.Errors;
 
 const DEFERRED = require('pull-defer');
 const pull = require('pull-stream');
+const uuidv1 = require('uuid/v1');
 
 /**
  * Structure for input params for Azure Data store
@@ -141,15 +145,10 @@ export class AzureDataStore {
    * @param callback
    */
   public get (key: any, callback: any): void {
-    const chunks = [];
-    let writeStream = fs.createWriteStream('azureBlob.txt');
+    var writeStream: any = new WMStream(this.getFullKey(key));
 
     writeStream.on('finish', () => {
-      fs.readFile('azureBlob.txt', (_err, data) => {
-        if (data) {
-          return callback(null, Buffer.from(data));
-        }
-      });
+      return callback(null, writeStream.memStore[this.getFullKey(key)]);
     });
 
     this.opts.blob.getBlobToStream(this.container, this.getFullKey(key), writeStream, (err, result, response) => {
@@ -160,25 +159,6 @@ export class AzureDataStore {
       }
     });
   }
-
-  /**
-   * Read content from azure blob storage.
-   * @param key
-   * @param callback
-   */
-//   public get (key: any, callback: any): void {
-//     this.opts.blob.getBlobToText(this.container, this.getFullKey(key), { disableContentMD5Validation: true}, (err, text, result, response) => {
-//       if (err && response.statusCode === 404)
-//       {
-//         return callback(Errors.notFoundError(err));
-//       }
-//       else if (response.statusCode !== 200 && err)
-//       {
-//         return callback(err);
-//       }
-//       return callback(null, Buffer.from(text, 'utf-8'));
-//     });
-// }
 
   /**
    * Check for the existence of the given key.
