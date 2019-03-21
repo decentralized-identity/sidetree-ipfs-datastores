@@ -1,8 +1,10 @@
 const standin = require('stand-in');
 
 class BlobStorageError extends Error {
-  private code;
-  private statusCode;
+  /** Error code. */
+  public code;
+  /** Error status code. */
+  public statusCode;
   constructor (message, code) {
     super(message);
     this.code = message;
@@ -19,7 +21,7 @@ module.exports = (blobService) => {
   const mocks: any = {};
   const storage: any = {};
 
-  mocks.deleteContainerIfExists = standin.replace(blobService, 'deleteContainerIfExists', (stand, key, callback) => {
+  mocks.deleteContainerIfExists = standin.replace(blobService, 'deleteContainerIfExists', (_stand, key, callback) => {
     if (storage[key]) {
       delete storage[key];
       callback(null, {});
@@ -28,7 +30,7 @@ module.exports = (blobService) => {
     }
   });
 
-  mocks.getBlobToText = standin.replace(blobService, 'getBlobToText', (stand, name, key, options, callback) => {
+  mocks.getBlobToText = standin.replace(blobService, 'getBlobToText', (_stand, _name, key, _options, callback) => {
     if (storage[key]) {
       callback(null, { Body: storage[key] });
     } else {
@@ -36,7 +38,7 @@ module.exports = (blobService) => {
     }
   });
 
-  mocks.doesBlobExist = standin.replace(blobService, 'doesBlobExist', (standin, name, key, callback) => {
+  mocks.doesBlobExist = standin.replace(blobService, 'doesBlobExist', (_standin, _name, key, callback) => {
     if (storage[key]) {
       callback(null, {});
     } else {
@@ -44,7 +46,7 @@ module.exports = (blobService) => {
     }
   });
 
-  mocks.listBlobsSegmentedWithPrefix = standin.replace(blobService, 'listBlobsSegmentedWithPrefix', (standin, name, prefix, token, callback) => {
+  mocks.listBlobsSegmentedWithPrefix = standin.replace(blobService, 'listBlobsSegmentedWithPrefix', (_standin, _name, prefix, _token, callback) => {
     const results = {
       Contents: []
     };
@@ -60,7 +62,7 @@ module.exports = (blobService) => {
     callback(null, results);
   });
 
-  mocks.createBlockBlobFromText = standin.replace(blobService, 'createBlockBlobFromText', (stand, name, key, value, callback) => {
+  mocks.createBlockBlobFromText = standin.replace(blobService, 'createBlockBlobFromText', (_stand, _name, key, value, callback) => {
     storage[key] = value;
     callback(null);
   });
