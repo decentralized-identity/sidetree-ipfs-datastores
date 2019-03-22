@@ -6,10 +6,9 @@ chai.use(require('dirty-chai'));
 const Key = require('interface-datastore').Key;
 import * as storage from 'azure-storage';
 const blobServiceMock = require('./utils/blobStorage-mock');
-let fs = require('fs');
 const standin = require('stand-in');
 import { AzureDataStore } from '../src/index';
-import { write } from 'fs';
+import WritableMemoryStream from '../src/WritableMemoryStream';
 
 describe('AzureDataStore', () => {
   const blobService = storage.createBlobService();
@@ -88,14 +87,14 @@ describe('AzureDataStore', () => {
         if (err) {
           console.log('Error creating container');
         } else {
-          let writeStream = fs.createWriteStream('azureBlob.txt');
+          let writeStream = new WritableMemoryStream('.ipfs/datastore/z/key');
           const blobStore = new AzureDataStore('.ipfs/datastore', { blob: blobService, containerName: containerName });
 
           standin.replace(blobService, 'getBlobToStream', (stand, _name, key, writeStream, callback) => {
             expect(key).toEqual('.ipfs/datastore/z/key');
             stand.restore();
             callback(null, Buffer.from('test'), { statusCode: 200 });
-            writeStream.close();
+            done();
           });
 
           blobStore.get(new Key('/z/key'), done);

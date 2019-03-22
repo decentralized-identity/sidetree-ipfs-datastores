@@ -1,10 +1,8 @@
 import { BlobService } from 'azure-storage';
-import WMStream  from './WMStream';
-import { Writable } from 'stream';
-import { write } from 'fs';
-let fs = require('fs');
+import WritableMemoryStream from './WritableMemoryStream';
 const setImmediate = require('async/setImmediate');
 const each = require('async/each');
+const once = require('once');
 const waterfall = require('async/series');
 const path = require('upath');
 const asyncFilter = require('interface-datastore').utils.asyncFilter;
@@ -16,7 +14,6 @@ const Errors = iDatastore.Errors;
 
 const DEFERRED = require('pull-defer');
 const pull = require('pull-stream');
-const uuidv1 = require('uuid/v1');
 
 /**
  * Structure for input params for Azure Data store
@@ -78,6 +75,7 @@ export class AzureDataStore {
       callback = keys;
       keys = [];
     }
+    callback = once(callback);
     this.opts.blob.listBlobsSegmentedWithPrefix(this.container, prefix, currentToken, (err, result, response) => {
       if (err) {
         return callback(new Error(err.name));
@@ -103,6 +101,7 @@ export class AzureDataStore {
 
     return {
       next: (callback: any) => {
+        callback = once(callback);
         if (count >= keys.length) {
           return callback(null, null, null);
         }
@@ -124,18 +123,12 @@ export class AzureDataStore {
    * @param callback
    */
   public put (key: any, val: Buffer, callback: any): void {
-    // const options : BlobService.CreateBlobRequestOptions = {
-    //   contentSettings: {
-    //     contentEncoding: 'utf-8',
-    //     contentType: 'text/plain'
-    //   }
-    // };
-
+    callback = once(callback);
     this.opts.blob.createBlockBlobFromText(this.container, this.getFullKey(key), val, (err, result, response) => {
       if (err) {
         return callback(Errors.dbWriteFailedError(err));
       }
-      return callback();
+      callback();
     });
   }
 
@@ -145,10 +138,11 @@ export class AzureDataStore {
    * @param callback
    */
   public get (key: any, callback: any): void {
-    var writeStream: any = new WMStream(this.getFullKey(key));
+    callback = once(callback);
+    let writeStream: any = new WritableMemoryStream(this.getFullKey(key));
 
     writeStream.on('finish', () => {
-      return callback(null, writeStream.memStore[this.getFullKey(key)]);
+      callback(null, writeStream.memStore[this.getFullKey(key)]);
     });
 
     this.opts.blob.getBlobToStream(this.container, this.getFullKey(key), writeStream, (err, result, response) => {
@@ -166,13 +160,14 @@ export class AzureDataStore {
    * @param callback
    */
   public has (key: any, callback: any): void {
+    callback = once(callback);
     this.opts.blob.doesBlobExist(this.container, this.getFullKey(key), (err, result, response) => {
       if (err) {
-        callback(err, false);
+        return callback(err, false);
       } else if (result && result.exists) {
         callback(null, true);
       } else {
-        callback(null, false);
+        return callback(null, false);
       }
     });
   }
@@ -183,6 +178,7 @@ export class AzureDataStore {
    * @param callback
    */
   public delete (key: any, callback: any): void {
+    callback = once(callback);
     this.opts.blob.deleteBlobIfExists(this.container, this.getFullKey(key), (err, result, response) => {
       if (err) {
         return callback(Errors.dbDeleteFailedError(err));
@@ -209,6 +205,7 @@ export class AzureDataStore {
         deletes.push(key);
       },
       commit: (callback: any) => {
+        callback = once(callback);
         waterfall([
           (cb) => each(puts, (p, _cb) => {
             this.put(p.key, p.value, _cb);
@@ -232,6 +229,7 @@ export class AzureDataStore {
     let iterator: any;
 
     const rawStream = (end: any, callback: any) => {
+      callback = once(callback);
       if (end) {
         return callback(end);
       }
@@ -293,6 +291,7 @@ export class AzureDataStore {
    * @param callback
    */
   public open (callback: any): void {
+    callback = once(callback);
     this.opts.blob.doesBlobExist(this.container, this.path, (err, result, response) => {
       if (err) {
         return callback(Errors.dbOpenFailedError(err));
