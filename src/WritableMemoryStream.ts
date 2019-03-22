@@ -18,10 +18,6 @@ export default class WritableMemoryStream extends Writable {
    */
   public constructor (key: string, options?: any) {
     super();
-    // Allow to be used without calling new
-    if (!(this instanceof WritableMemoryStream)) {
-      return new WritableMemoryStream(key, options);
-    }
 
     Writable.call(this, options);
     this.key = key;
