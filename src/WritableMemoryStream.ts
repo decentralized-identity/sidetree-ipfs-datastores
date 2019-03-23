@@ -6,22 +6,26 @@ const Writable = stream.Writable;
  * Writable Memory stream class
  */
 export default class WritableMemoryStream extends Writable {
-  /** InMem map to store stream data */
-  public memStore: {[key: string]: Buffer} = {};
-
-  private key: string;
+  /** variable to store stream data */
+  private memStore: Buffer;
 
   /**
    * Constructor to initialize the memory stream
    * @param key Unique key to identify data.
    * @param options Other options for the writable stream.
    */
-  public constructor (key: string, options?: any) {
+  public constructor (options?: any) {
     super();
 
     Writable.call(this, options);
-    this.key = key;
-    this.memStore[key] = Buffer.from('');
+    this.memStore = Buffer.from('');
+  }
+
+  /**
+   * Return stored inmem stream data.
+   */
+  public fetchData (): Buffer {
+    return this.memStore;
   }
 }
 
@@ -30,6 +34,6 @@ export default class WritableMemoryStream extends Writable {
  */
 WritableMemoryStream.prototype._write = function (chunk: string, enc: string, cb) {
   let buffer = (Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk, enc));
-  this.memStore[this.key] = Buffer.concat([this.memStore[this.key], buffer]);
+  this.memStore = Buffer.concat([this.memStore, buffer]);
   cb();
 };

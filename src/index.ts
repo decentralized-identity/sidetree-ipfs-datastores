@@ -139,10 +139,10 @@ export class AzureDataStore {
    */
   public get (key: any, callback: any): void {
     callback = once(callback);
-    let writeStream: any = new WritableMemoryStream(this.getFullKey(key));
+    let writeStream: any = new WritableMemoryStream();
 
     writeStream.on('finish', () => {
-      callback(null, writeStream.memStore[this.getFullKey(key)]);
+      callback(null, writeStream.fetchData());
     });
 
     this.opts.blob.getBlobToStream(this.container, this.getFullKey(key), writeStream, (err, result, response) => {
