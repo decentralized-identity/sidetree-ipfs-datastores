@@ -87,7 +87,7 @@ describe('AzureDataStore', () => {
         if (err) {
           console.log('Error creating container');
         } else {
-          let writeStream = new WritableMemoryStream('.ipfs/datastore/z/key');
+          let writeStream = new WritableMemoryStream();
           const blobStore = new AzureDataStore('.ipfs/datastore', { blob: blobService, containerName: containerName });
 
           standin.replace(blobService, 'getBlobToStream', (stand, _name, key, writeStream, callback) => {

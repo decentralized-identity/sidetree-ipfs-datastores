@@ -1,5 +1,4 @@
-const util = require('util');
-const stream = require('stream');
+import * as stream from 'stream';
 const Writable = stream.Writable;
 
 /**
@@ -7,33 +6,35 @@ const Writable = stream.Writable;
  */
 export default class WritableMemoryStream extends Writable {
   /** variable to store stream data */
-  private memStore: Buffer;
+  private memStore: Buffer[];
 
   /**
    * Constructor to initialize the memory stream
-   * @param key Unique key to identify data.
    * @param options Other options for the writable stream.
    */
-  public constructor (options?: any) {
+  public constructor (options?: stream.WritableOptions) {
     super();
 
     Writable.call(this, options);
-    this.memStore = Buffer.from('');
+    this.memStore = [Buffer.from('')];
   }
 
   /**
-   * Return stored inmem stream data.
+   * Returns stored inmem stream data.
    */
   public fetchData (): Buffer {
-    return this.memStore;
+    return Buffer.concat(this.memStore);
+  }
+
+  /**
+   * Overwrite write method of the parent class to write to inmem store.
+   * @param chunk Data chunk to store.
+   * @param encoding Encoding format.
+   * @param cb Function to call after storing data.
+   */
+  public _write(chunk: any, encoding: string, cb: (error?: Error | null) => void): void {
+    let buffer: Buffer = (Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk, encoding));
+    this.memStore.push(buffer);
+    cb();
   }
 }
-
-/**
- * Overwrite write method of the parent class to write to inmem store.
- */
-WritableMemoryStream.prototype._write = function (chunk: string, enc: string, cb) {
-  let buffer = (Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk, enc));
-  this.memStore = Buffer.concat([this.memStore, buffer]);
-  cb();
-};
