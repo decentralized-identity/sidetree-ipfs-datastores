@@ -32,7 +32,7 @@ export default class WritableMemoryStream extends Writable {
    * @param encoding Encoding format.
    * @param cb Function to call after storing data.
    */
-  public _write(chunk: any, encoding: string, cb: (error?: Error | null) => void): void {
+  public _write(chunk: string | Buffer, encoding: string, cb: (error?: Error | null) => void): void {
     let buffer: Buffer = (Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk, encoding));
     this.memStore.push(buffer);
     cb();
