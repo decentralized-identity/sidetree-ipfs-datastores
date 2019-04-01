@@ -4,7 +4,7 @@ if (process.env['NODE_ENV'] !== 'production') {
 
 import * as storage from 'azure-storage';
 import BlobLock from './blobLock';
-const Repo = require('ipfs-repo');
+const ipfsRepo = require('ipfs-repo');
 const IPFS = require('ipfs');
 const datastore = require('datastore-azure');
 const AzureDataStore = datastore.AzureDataStore;
@@ -28,7 +28,7 @@ blobService.createContainerIfNotExists(containerName, err => {
     const blobLock = new BlobLock(blobStore);
 
     // Create the IPFS repo, backed by Azure blob storage
-    const repo = new Repo('/tmp/test/.ipfs', {
+    const repo = new ipfsRepo('/tmp/test/.ipfs', {
       storageBackends: {
         root: AzureDataStore,
         blocks: AzureDataStore,

@@ -1,5 +1,5 @@
 import { BlobService } from 'azure-storage';
-let fs = require('fs');
+import WritableMemoryStream from './WritableMemoryStream';
 const setImmediate = require('async/setImmediate');
 const each = require('async/each');
 const waterfall = require('async/series');
@@ -74,6 +74,7 @@ export class AzureDataStore {
       callback = keys;
       keys = [];
     }
+    
     this.opts.blob.listBlobsSegmentedWithPrefix(this.container, prefix, currentToken, (err, result, response) => {
       if (err) {
         return callback(new Error(err.name));
@@ -120,18 +121,11 @@ export class AzureDataStore {
    * @param callback
    */
   public put (key: any, val: Buffer, callback: any): void {
-    // const options : BlobService.CreateBlobRequestOptions = {
-    //   contentSettings: {
-    //     contentEncoding: 'utf-8',
-    //     contentType: 'text/plain'
-    //   }
-    // };
-
     this.opts.blob.createBlockBlobFromText(this.container, this.getFullKey(key), val, (err, result, response) => {
       if (err) {
         return callback(Errors.dbWriteFailedError(err));
       }
-      return callback();
+      callback();
     });
   }
 
@@ -141,15 +135,10 @@ export class AzureDataStore {
    * @param callback
    */
   public get (key: any, callback: any): void {
-    const chunks = [];
-    let writeStream = fs.createWriteStream('azureBlob.txt');
+    let writeStream: WritableMemoryStream = new WritableMemoryStream();
 
     writeStream.on('finish', () => {
-      fs.readFile('azureBlob.txt', (_err, data) => {
-        if (data) {
-          return callback(null, Buffer.from(data));
-        }
-      });
+      callback(null, writeStream.fetchData());
     });
 
     this.opts.blob.getBlobToStream(this.container, this.getFullKey(key), writeStream, (err, result, response) => {
@@ -160,25 +149,6 @@ export class AzureDataStore {
       }
     });
   }
-
-  /**
-   * Read content from azure blob storage.
-   * @param key
-   * @param callback
-   */
-//   public get (key: any, callback: any): void {
-//     this.opts.blob.getBlobToText(this.container, this.getFullKey(key), { disableContentMD5Validation: true}, (err, text, result, response) => {
-//       if (err && response.statusCode === 404)
-//       {
-//         return callback(Errors.notFoundError(err));
-//       }
-//       else if (response.statusCode !== 200 && err)
-//       {
-//         return callback(err);
-//       }
-//       return callback(null, Buffer.from(text, 'utf-8'));
-//     });
-// }
 
   /**
    * Check for the existence of the given key.

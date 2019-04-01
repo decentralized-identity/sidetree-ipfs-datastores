@@ -5,7 +5,7 @@
 export default class BlobLock {
   private blob: any;
 
-  constructor(blobDataStore: any) {
+  constructor (blobDataStore: any) {
     this.blob = blobDataStore;
   }
 
@@ -29,7 +29,7 @@ export default class BlobLock {
         return callback(new Error('The repo is already locked'));
       }
 
-      this.blob.put(lockPath, Buffer.from(''), (err, _data) => {
+      this.blob.put(lockPath, Buffer.from(''), (err: any, _data: any) => {
         if (err) {
           return callback(err, null);
         }
@@ -48,8 +48,8 @@ export default class BlobLock {
        * Removes the lock. This can be overridden to customize how the lock is removed.
        * @param callback Function(error)
        */
-      close: (callback) => {
-        this.blob.delete(lockPath, (err) => {
+      close: (callback: any) => {
+        this.blob.delete(lockPath, (err: any) => {
           if (err && err.statusCode !== 404) {
             return callback(err);
           }
@@ -81,8 +81,8 @@ export default class BlobLock {
    * @param dir {string} LockFile path
    * @param callback {Function(Error, boolean)}
    */
-  public locked (_dir: string, callback: (err: Error, locked: boolean) => void): void {
-    this.blob.get(this.getLockFilePath(), (err, _data) => {
+  public locked (_dir: string, callback: (err: any, locked: boolean) => void): void {
+    this.blob.get(this.getLockFilePath(), (err: any, _data: any) => {
       if (err && err.code === 'ERR_NOT_FOUND') {
         return callback(null, false);
       } else if (err) {
