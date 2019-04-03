@@ -1,17 +1,23 @@
 {
-  "name": "sidetree-ipfs-datastores",
+  "name": "@decentralized-identity/sidetree-ipfs-datastores",
   "version": "0.1.0",
   "description": "Implementations of IPFS datastore used by sidetree-ipfs microservice",
   "repository": "https://github.com/decentralized-identity/sidetree-ipfs-datastores",
   "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
   "scripts": {
     "test": "jasmine-ts --config=./test/jasmine.json",
     "build": "tsc -p .",
-    "lint": "tslint --fix --project ."
+    "lint": "tslint --fix --project .",
+    "prepare": "npm run build",
+    "prepublishOnly": "npm test && npm run lint"
   },
   "keywords": [
     "ipfs",
     "datastore"
+  ],
+  "files": [
+    "dist/src/**/*"
   ],
   "dependencies": {
     "@azure/storage-blob": "^10.3.0",

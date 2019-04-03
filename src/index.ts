@@ -74,7 +74,7 @@ export class AzureDataStore {
       callback = keys;
       keys = [];
     }
-    
+
     this.opts.blob.listBlobsSegmentedWithPrefix(this.container, prefix, currentToken, (err, result, response) => {
       if (err) {
         return callback(new Error(err.name));
