@@ -1,4 +1,4 @@
-import { BlobService } from 'azure-storage';
+import * as storage from 'azure-storage';
 import WritableMemoryStream from './WritableMemoryStream';
 const setImmediate = require('async/setImmediate');
 const each = require('async/each');
@@ -18,12 +18,10 @@ const pull = require('pull-stream');
  * Structure for input params for Azure Data store
  */
 export type AzureDSInputOptions = {
-  /** A client for Azure Blob Service. */
-  blob: BlobService,
   /** Name of blob container. */
   containerName: string,
-  /** TODO: Issue #1 - Remove this property. */
-  createIfMissing?: boolean
+  /** azure storage connection string */
+  connectionString?: string
 };
 
 /**
@@ -33,9 +31,7 @@ export class AzureDataStore {
   private path: string;
   private opts: AzureDSInputOptions;
   private container: string;
-  /** Flag to create azure blob container if missing */
-  public createIfMissing: boolean;
-
+  private blobService: storage.BlobService;
   /**
    * Constructor to initialize the class
    * @param path path to azure blob storage container
@@ -46,11 +42,11 @@ export class AzureDataStore {
     this.path = path;
     this.opts = opts;
     this.container = opts.containerName;
-    this.createIfMissing = opts.createIfMissing === undefined ? false : opts.createIfMissing;
+    this.blobService = storage.createBlobService(opts.connectionString);
 
-    this.opts.blob.doesContainerExist(this.container, (_error, result, response) => {
-      if (result.exists === false) {
-        throw new Error('Container doesnt exists');
+    this.blobService.createContainerIfNotExists(this.container, err => {
+      if (err) {
+        throw new Error('Could not create container');
       }
     });
   }
@@ -75,7 +71,7 @@ export class AzureDataStore {
       keys = [];
     }
 
-    this.opts.blob.listBlobsSegmentedWithPrefix(this.container, prefix, currentToken, (err, result, response) => {
+    this.blobService.listBlobsSegmentedWithPrefix(this.container, prefix, currentToken, (err, result, response) => {
       if (err) {
         return callback(new Error(err.name));
       }
@@ -121,7 +117,7 @@ export class AzureDataStore {
    * @param callback
    */
   public put (key: any, val: Buffer, callback: any): void {
-    this.opts.blob.createBlockBlobFromText(this.container, this.getFullKey(key), val, (err, result, response) => {
+    this.blobService.createBlockBlobFromText(this.container, this.getFullKey(key), val, (err, result, response) => {
       if (err) {
         return callback(Errors.dbWriteFailedError(err));
       }
@@ -141,7 +137,7 @@ export class AzureDataStore {
       callback(null, writeStream.fetchData());
     });
 
-    this.opts.blob.getBlobToStream(this.container, this.getFullKey(key), writeStream, (err, result, response) => {
+    this.blobService.getBlobToStream(this.container, this.getFullKey(key), writeStream, (err, result, response) => {
       if (err && err.message === 'NotFound') {
         return callback(Errors.notFoundError(err));
       } else if (err) {
@@ -156,7 +152,7 @@ export class AzureDataStore {
    * @param callback
    */
   public has (key: any, callback: any): void {
-    this.opts.blob.doesBlobExist(this.container, this.getFullKey(key), (err, result, response) => {
+    this.blobService.doesBlobExist(this.container, this.getFullKey(key), (err, result, response) => {
       if (err) {
         callback(err, false);
       } else if (result && result.exists) {
@@ -173,7 +169,7 @@ export class AzureDataStore {
    * @param callback
    */
   public delete (key: any, callback: any): void {
-    this.opts.blob.deleteBlobIfExists(this.container, this.getFullKey(key), (err, result, response) => {
+    this.blobService.deleteBlobIfExists(this.container, this.getFullKey(key), (err, result, response) => {
       if (err) {
         return callback(Errors.dbDeleteFailedError(err));
       }
@@ -283,7 +279,7 @@ export class AzureDataStore {
    * @param callback
    */
   public open (callback: any): void {
-    this.opts.blob.doesBlobExist(this.container, this.path, (err, result, response) => {
+    this.blobService.doesBlobExist(this.container, this.path, (err, result, response) => {
       if (err) {
         return callback(Errors.dbOpenFailedError(err));
       }

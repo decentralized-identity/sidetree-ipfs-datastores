@@ -11,60 +11,48 @@ import { AzureDataStore } from '../src/index';
 import WritableMemoryStream from '../src/WritableMemoryStream';
 
 describe('AzureDataStore', () => {
-  const blobService = storage.createBlobService();
   const containerName = 'ipfscontainer';
-  blobService.createContainerIfNotExists(containerName, err => {
-    if (err) {
-      console.log('Error creating container');
-    }
-  });
-  describe('construction', () => {
-    it('createIfMissing defaults to false', () => {
-      blobService.createContainerIfNotExists(containerName, err => {
-        if (err) {
-          console.log('Error creating container');
-        } else {
-          const blobStore = new AzureDataStore('.ipfs/datastore', { blob: blobService, containerName: containerName });
-          expect(blobStore.createIfMissing).toBe(false);
-        }
-      });
-    });
-    it('createIfMissing can be set to true', () => {
-      blobService.createContainerIfNotExists(containerName, err => {
-        if (err) {
-          console.log('Error creating container');
-        } else {
-          const blobStore = new AzureDataStore('.ipfs/datastore', { blob: blobService, containerName: containerName, createIfMissing: true });
-          expect(blobStore.createIfMissing).toBe(true);
-        }
-      });
-    });
-  });
+  // describe('construction', () => {
+  //   it('createIfMissing defaults to false', () => {
+  //     blobService.createContainerIfNotExists(containerName, err => {
+  //       if (err) {
+  //         console.log('Error creating container');
+  //       } else {
+  //         const blobStore = new AzureDataStore('.ipfs/datastore', { containerName: containerName });
+  //         expect(blobStore.createIfMissing).toBe(false);
+  //       }
+  //     });
+  //   });
+  //   it('createIfMissing can be set to true', () => {
+  //     blobService.createContainerIfNotExists(containerName, err => {
+  //       if (err) {
+  //         console.log('Error creating container');
+  //       } else {
+  //         const blobStore = new AzureDataStore('.ipfs/datastore', { blob: blobService, containerName: containerName, createIfMissing: true });
+  //         expect(blobStore.createIfMissing).toBe(true);
+  //       }
+  //     });
+  //   });
+  // });
 
   describe('put', () => {
     it('should include the path in the key', (done) => {
-      blobService.createContainerIfNotExists(containerName, err => {
-        if (err) {
-          console.log('Error creating container');
-        } else {
-          const blobStore = new AzureDataStore('.ipfs/datastore', { blob: blobService, containerName: containerName });
+      const blobStore = new AzureDataStore('.ipfs/datastore', { containerName: containerName });
 
-          standin.replace(blobService, 'createBlockBlobFromText', (stand, _name, key, _value, callback) => {
-            expect(key).toEqual('.ipfs/datastore/z/key');
-            stand.restore();
-            callback(null);
-          });
-
-          blobStore.put(new Key('/z/key'), Buffer.from('test data'), done);
-        }
+      standin.replace(blobService, 'createBlockBlobFromText', (stand, _name, key, _value, callback) => {
+        expect(key).toEqual('.ipfs/datastore/z/key');
+        stand.restore();
+        callback(null);
       });
+
+      blobStore.put(new Key('/z/key'), Buffer.from('test data'), done);
     });
     it('should return a standard error when the put fails', (done) => {
       blobService.createContainerIfNotExists(containerName, err => {
         if (err) {
           console.log('Error creating container');
         } else {
-          const blobStore = new AzureDataStore('.ipfs/datastore', { blob: blobService, containerName: containerName });
+          const blobStore = new AzureDataStore('.ipfs/datastore', { containerName: containerName });
 
           standin.replace(blobService, 'createBlockBlobFromText', (stand, _name, key, _value, callback) => {
             expect(key).toEqual('.ipfs/datastore/z/key');
@@ -88,7 +76,7 @@ describe('AzureDataStore', () => {
           console.log('Error creating container');
         } else {
           let writeStream = new WritableMemoryStream();
-          const blobStore = new AzureDataStore('.ipfs/datastore', { blob: blobService, containerName: containerName });
+          const blobStore = new AzureDataStore('.ipfs/datastore', { containerName: containerName });
 
           standin.replace(blobService, 'getBlobToStream', (stand, _name, key, writeStream, callback) => {
             expect(key).toEqual('.ipfs/datastore/z/key');
@@ -106,7 +94,7 @@ describe('AzureDataStore', () => {
         if (err) {
           console.log('Error creating container');
         } else {
-          const blobStore = new AzureDataStore('.ipfs/datastore', { blob: blobService, containerName: containerName });
+          const blobStore = new AzureDataStore('.ipfs/datastore', { containerName: containerName });
 
           standin.replace(blobService, 'getBlobToStream', (stand, _name, key, _writeStream, callback) => {
             expect(key).toEqual('.ipfs/datastore/z/key');
@@ -130,7 +118,7 @@ describe('AzureDataStore', () => {
         if (err) {
           console.log('Error creating container');
         } else {
-          const blobStore = new AzureDataStore('.ipfs/datastore', { blob: blobService, containerName: containerName });
+          const blobStore = new AzureDataStore('.ipfs/datastore', { containerName: containerName });
 
           standin.replace(blobService, 'deleteBlobIfExists', (stand, _name, key, callback) => {
             expect(key).toEqual('.ipfs/datastore/z/key');
@@ -153,7 +141,7 @@ describe('AzureDataStore', () => {
         if (err) {
           console.log('Error creating container');
         } else {
-          const blobStore = new AzureDataStore('.ipfs/datastore', { blob: blobService, containerName: containerName });
+          const blobStore = new AzureDataStore('.ipfs/datastore', { containerName: containerName });
 
           standin.replace(blobService, 'doesBlobExist', (stand, _name, _key, callback) => {
             stand.restore();
