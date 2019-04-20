@@ -5,7 +5,7 @@ if (process.env['NODE_ENV'] !== 'production') {
 import BlobLock from './blobLock';
 const ipfsRepo = require('ipfs-repo');
 const IPFS = require('ipfs');
-import * as dataStore from 'datastore-azure';
+import * as dataStore from '@decentralized-identity/sidetree-ipfs-datastores';
 const AzureDataStore = dataStore.AzureDataStore;
 
 const containerName = 'ipfscontainer';

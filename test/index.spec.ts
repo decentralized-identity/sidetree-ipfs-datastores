@@ -4,8 +4,6 @@ if (process.env['NODE_ENV'] !== 'production') {
 const chai = require('chai');
 chai.use(require('dirty-chai'));
 const Key = require('interface-datastore').Key;
-import * as storage from 'azure-storage';
-const blobServiceMock = require('./utils/blobStorage-mock');
 const standin = require('stand-in');
 import { AzureDataStore } from '../src/index';
 import WritableMemoryStream from '../src/WritableMemoryStream';
@@ -13,14 +11,14 @@ import WritableMemoryStream from '../src/WritableMemoryStream';
 describe('AzureDataStore', () => {
   const containerName = 'ipfscontainer';
   let blobStore: AzureDataStore;
-  beforeAll (() => {
+  beforeAll(() => {
     blobStore = new AzureDataStore('.ipfs/datastore', { containerName: containerName });
-  })
+  });
 
   describe('construction', () => {
     it('blob Service is created', () => {
-      expect(blobStore.getBlobService()).toBeDefined();
-      blobStore.getBlobService().doesContainerExist(containerName, (err, result) => {
+      expect(AzureDataStore.getBlobService()).toBeDefined();
+      AzureDataStore.getBlobService().doesContainerExist(containerName, (err, result) => {
         expect(err).toBeNull();
         expect(result.exists).toEqual(true);
       });
@@ -29,7 +27,7 @@ describe('AzureDataStore', () => {
 
   describe('put', () => {
     it('should include the path in the key', (done) => {
-      standin.replace(blobStore.getBlobService(), 'createBlockBlobFromText', (stand, _name, key, _value, callback) => {
+      standin.replace(AzureDataStore.getBlobService(), 'createBlockBlobFromText', (stand, _name, key, _value, callback) => {
         expect(key).toEqual('.ipfs/datastore/z/key');
         stand.restore();
         callback(null);
@@ -39,7 +37,7 @@ describe('AzureDataStore', () => {
     });
 
     it('should return a standard error when the put fails', (done) => {
-      standin.replace(blobStore.getBlobService(), 'createBlockBlobFromText', (stand, _name, key, _value, callback) => {
+      standin.replace(AzureDataStore.getBlobService(), 'createBlockBlobFromText', (stand, _name, key, _value, callback) => {
         expect(key).toEqual('.ipfs/datastore/z/key');
         stand.restore();
         callback(new Error('bad things happened'));
@@ -56,7 +54,7 @@ describe('AzureDataStore', () => {
     it('should include the path in the fetch key', (done) => {
       let writeStream = new WritableMemoryStream();
 
-      standin.replace(blobStore.getBlobService(), 'getBlobToStream', (stand, _name, key, writeStream, callback) => {
+      standin.replace(AzureDataStore.getBlobService(), 'getBlobToStream', (stand, _name, key, writeStream, callback) => {
         expect(key).toEqual('.ipfs/datastore/z/key');
         stand.restore();
         callback(null, Buffer.from('test'), { statusCode: 200 });
@@ -67,7 +65,7 @@ describe('AzureDataStore', () => {
     });
 
     it('should return a standard not found error code if the key isnt found', (done) => {
-      standin.replace(blobStore.getBlobService(), 'getBlobToStream', (stand, _name, key, _writeStream, callback) => {
+      standin.replace(AzureDataStore.getBlobService(), 'getBlobToStream', (stand, _name, key, _writeStream, callback) => {
         expect(key).toEqual('.ipfs/datastore/z/key');
         stand.restore();
         let error = new Error('NotFound');
@@ -83,7 +81,7 @@ describe('AzureDataStore', () => {
 
   describe('delete', () => {
     it('should return a standard delete error if deletion fails', (done) => {
-      standin.replace(blobStore.getBlobService(), 'deleteBlobIfExists', (stand, _name, key, callback) => {
+      standin.replace(AzureDataStore.getBlobService(), 'deleteBlobIfExists', (stand, _name, key, callback) => {
         expect(key).toEqual('.ipfs/datastore/z/key');
         stand.restore();
         callback(new Error('bad things'));
@@ -98,7 +96,7 @@ describe('AzureDataStore', () => {
 
   describe('open', () => {
     it('should return a standard open error if blob exist check fails', (done) => {
-      standin.replace(blobStore.getBlobService(), 'doesBlobExist', (stand, _name, _key, callback) => {
+      standin.replace(AzureDataStore.getBlobService(), 'doesBlobExist', (stand, _name, _key, callback) => {
         stand.restore();
         callback(new Error('unknown'));
       });
