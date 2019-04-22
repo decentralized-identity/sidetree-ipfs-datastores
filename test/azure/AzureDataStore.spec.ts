@@ -5,17 +5,17 @@ const chai = require('chai');
 chai.use(require('dirty-chai'));
 const Key = require('interface-datastore').Key;
 import * as storage from 'azure-storage';
-const blobServiceMock = require('./utils/blobStorage-mock');
+const blobServiceMock = require('./mocks/MockBlobStorage');
 const standin = require('stand-in');
-import { AzureDataStore } from '../src/index';
-import WritableMemoryStream from '../src/WritableMemoryStream';
+import { AzureDataStore } from '../../lib/index';
+import WritableMemoryStream from '../../lib/azure/WritableMemoryStream';
 
 describe('AzureDataStore', () => {
   const containerName = 'ipfscontainer';
   let blobStore: AzureDataStore;
-  beforeAll (() => {
+  beforeAll(() => {
     blobStore = new AzureDataStore('.ipfs/datastore', { containerName: containerName });
-  })
+  });
 
   describe('construction', () => {
     it('blob Service is created', () => {
@@ -109,22 +109,4 @@ describe('AzureDataStore', () => {
       });
     });
   });
-
-//   describe('interface-datastore', () => {
-//     require('interface-datastore/src/tests')({
-//       setup (callback) {
-//         blobService.createContainerIfNotExists(containerName, err => {
-//           if (err) {
-//             console.log('Error creating container');
-//           } else {
-//             blobServiceMock(blobService);
-//             callback(null, new AzureDataStore('.ipfs/datastore', { blob: blobService, containerName: containerName }));
-//           }
-//         });
-//       },
-//       teardown (callback) {
-//         callback(null);
-//       }
-//     });
-//   });
 });

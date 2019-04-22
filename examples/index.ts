@@ -3,15 +3,14 @@ if (process.env['NODE_ENV'] !== 'production') {
 }
 
 import BlobLock from './blobLock';
+import { AzureDataStore, AzureDSInputOptions } from 'datastore-azure';
 const ipfsRepo = require('ipfs-repo');
 const IPFS = require('ipfs');
-import * as dataStore from 'datastore-azure';
-const AzureDataStore = dataStore.AzureDataStore;
 
 const containerName = 'ipfscontainer';
 const path = '/tmp/test/.ipfs';
 
-let opts: dataStore.AzureDSInputOptions = {
+let opts: AzureDSInputOptions = {
   containerName: containerName
 };
 const blobStore = new AzureDataStore(path, opts);
