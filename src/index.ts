@@ -20,7 +20,7 @@ const pull = require('pull-stream');
 export type AzureDSInputOptions = {
   /** Name of blob container. */
   containerName: string,
-  /** azure storage connection string */
+  /** azure storage blob Service instance */
   blobService: storage.BlobService
 };
 
