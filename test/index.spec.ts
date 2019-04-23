@@ -4,22 +4,22 @@ if (process.env['NODE_ENV'] !== 'production') {
 const chai = require('chai');
 chai.use(require('dirty-chai'));
 const Key = require('interface-datastore').Key;
-import * as storage from 'azure-storage';
-const blobServiceMock = require('./utils/blobStorage-mock');
 const standin = require('stand-in');
 import { AzureDataStore } from '../src/index';
+import * as storage from 'azure-storage';
 import WritableMemoryStream from '../src/WritableMemoryStream';
 
 describe('AzureDataStore', () => {
   const containerName = 'ipfscontainer';
   let blobStore: AzureDataStore;
-  beforeAll (() => {
-    blobStore = new AzureDataStore('.ipfs/datastore', { containerName: containerName });
-  })
+  let blobService: storage.BlobService;
+  beforeAll(() => {
+    blobService = storage.createBlobService();
+    blobStore = new AzureDataStore('.ipfs/datastore', { containerName: containerName, blobService: blobService });
+  });
 
   describe('construction', () => {
     it('blob Service is created', () => {
-      expect(blobStore.getBlobService()).toBeDefined();
       blobStore.getBlobService().doesContainerExist(containerName, (err, result) => {
         expect(err).toBeNull();
         expect(result.exists).toEqual(true);
