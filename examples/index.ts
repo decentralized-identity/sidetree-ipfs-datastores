@@ -3,7 +3,7 @@ if (process.env['NODE_ENV'] !== 'production') {
 }
 
 import * as storage from 'azure-storage';
-import { AzureBlobLock, AzureDataStore, AzureDSInputOptions } from '@decentralized-identity/sidetree-ipfs-datastores';
+import { MockLock, AzureDataStore, AzureDSInputOptions } from '@decentralized-identity/sidetree-ipfs-datastores';
 const ipfsRepo = require('ipfs-repo');
 const IPFS = require('ipfs');
 
@@ -15,8 +15,8 @@ let opts: AzureDSInputOptions = {
   containerName: containerName,
   blobService: blobService
 };
-const blobStore = new AzureDataStore(path, opts);
-const blobLock = new AzureBlobLock(blobStore);
+
+const blobLock = new MockLock();
 
 // Create the IPFS repo, backed by Azure blob storage
 const repo = new ipfsRepo(path, {
