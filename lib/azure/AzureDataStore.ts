@@ -20,8 +20,8 @@ const pull = require('pull-stream');
 export type AzureDSInputOptions = {
   /** Name of blob container. */
   containerName: string,
-  /** azure storage connection string */
-  connectionString?: string
+  /** azure storage blob Service instance */
+  blobService: storage.BlobService
 };
 
 /**
@@ -29,8 +29,9 @@ export type AzureDSInputOptions = {
  */
 export default class AzureDataStore {
   private path: string;
-  private container: string;
   private blobService: storage.BlobService;
+  private container: string;
+
   /**
    * Constructor to initialize the class
    * @param path path to azure blob storage container
@@ -40,7 +41,7 @@ export default class AzureDataStore {
   public constructor (path: string, opts: AzureDSInputOptions) {
     this.path = path;
     this.container = opts.containerName;
-    this.blobService = !opts.connectionString ? storage.createBlobService() : storage.createBlobService(opts.connectionString);
+    this.blobService = opts.blobService;
 
     this.blobService.createContainerIfNotExists(this.container, err => {
       if (err) {
@@ -50,12 +51,11 @@ export default class AzureDataStore {
   }
 
   /**
-   * Returns the blob service object
+   * Returns the blob service instance
    */
   public getBlobService (): storage.BlobService {
     return this.blobService;
   }
-
   /**
    * Returns the full key which includes the path to the ipfs store
    * @param key

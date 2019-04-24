@@ -2,16 +2,19 @@ if (process.env['NODE_ENV'] !== 'production') {
   require('dotenv').load();
 }
 
+import * as storage from 'azure-storage';
 import BlobLock from './blobLock';
-import { AzureDataStore, AzureDSInputOptions } from 'datastore-azure';
+import { AzureDataStore, AzureDSInputOptions } from '@decentralized-identity/sidetree-ipfs-datastores';
 const ipfsRepo = require('ipfs-repo');
 const IPFS = require('ipfs');
 
 const containerName = 'ipfscontainer';
 const path = '/tmp/test/.ipfs';
+let blobService: storage.BlobService = storage.createBlobService();
 
 let opts: AzureDSInputOptions = {
-  containerName: containerName
+  containerName: containerName,
+  blobService: blobService
 };
 const blobStore = new AzureDataStore(path, opts);
 const blobLock = new BlobLock(blobStore);
