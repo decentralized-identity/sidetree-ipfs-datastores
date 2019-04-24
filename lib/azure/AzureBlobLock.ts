@@ -2,7 +2,7 @@
  * Uses an blob object in Azure blob container as a lock to signal that an IPFS repo is in use.
  * This ensures multiple IPFS nodes doesnt use the same Azure container as a datastore at the same time.
  */
-export default class BlobLock {
+export default class AzureBlobLock {
   private blob: any;
 
   constructor (blobDataStore: any) {
