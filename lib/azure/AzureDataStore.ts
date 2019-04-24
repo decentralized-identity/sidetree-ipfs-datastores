@@ -27,7 +27,7 @@ export type AzureDSInputOptions = {
 /**
  * Azure data store class that implements IDataStore
  */
-export class AzureDataStore {
+export default class AzureDataStore {
   private path: string;
   private blobService: storage.BlobService;
   private container: string;

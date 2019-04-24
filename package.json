@@ -3,8 +3,8 @@
   "version": "0.1.2",
   "description": "Implementations of IPFS datastore used by sidetree-ipfs microservice",
   "repository": "https://github.com/decentralized-identity/sidetree-ipfs-datastores",
-  "main": "dist/src/index.js",
-  "types": "dist/src/index.d.ts",
+  "main": "dist/lib/index.js",
+  "types": "dist/lib/index.d.ts",
   "scripts": {
     "test": "jasmine-ts --config=./test/jasmine.json",
     "build": "tsc -p .",
@@ -17,7 +17,7 @@
     "datastore"
   ],
   "files": [
-    "dist/src/**/*"
+    "dist/lib/**/*"
   ],
   "dependencies": {
     "async": "^2.6.1",

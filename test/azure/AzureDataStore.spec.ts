@@ -4,10 +4,11 @@ if (process.env['NODE_ENV'] !== 'production') {
 const chai = require('chai');
 chai.use(require('dirty-chai'));
 const Key = require('interface-datastore').Key;
-const standin = require('stand-in');
-import { AzureDataStore } from '../src/index';
 import * as storage from 'azure-storage';
-import WritableMemoryStream from '../src/WritableMemoryStream';
+const blobServiceMock = require('./mocks/MockBlobStorage');
+const standin = require('stand-in');
+import { AzureDataStore } from '../../lib/index';
+import WritableMemoryStream from '../../lib/azure/WritableMemoryStream';
 
 describe('AzureDataStore', () => {
   const containerName = 'ipfscontainer';
@@ -109,22 +110,4 @@ describe('AzureDataStore', () => {
       });
     });
   });
-
-//   describe('interface-datastore', () => {
-//     require('interface-datastore/src/tests')({
-//       setup (callback) {
-//         blobService.createContainerIfNotExists(containerName, err => {
-//           if (err) {
-//             console.log('Error creating container');
-//           } else {
-//             blobServiceMock(blobService);
-//             callback(null, new AzureDataStore('.ipfs/datastore', { blob: blobService, containerName: containerName }));
-//           }
-//         });
-//       },
-//       teardown (callback) {
-//         callback(null);
-//       }
-//     });
-//   });
 });
