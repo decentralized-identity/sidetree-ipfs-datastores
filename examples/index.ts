@@ -15,7 +15,7 @@ let opts: AzureDSInputOptions = {
   containerName: containerName,
   blobService: blobService
 };
-// const blobStore = new AzureDataStore(path, opts);
+
 const blobLock = new MockLock();
 
 // Create the IPFS repo, backed by Azure blob storage
