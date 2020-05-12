@@ -27,7 +27,7 @@ export type AzureDSInputOptions = {
 /**
  * Azure data store class that implements IDataStore
  */
-export default class AzureDataStore {
+export default class AzureDataStore extends iDatastore.Adapter {
   private path: string;
   private blobService: storage.BlobService;
   private container: string;
@@ -39,6 +39,7 @@ export default class AzureDataStore {
    * @param containerName Azure blob storage container name
    */
   public constructor (path: string, opts: AzureDSInputOptions) {
+    super();
     this.path = path;
     this.container = opts.containerName;
     this.blobService = opts.blobService;
@@ -70,28 +71,27 @@ export default class AzureDataStore {
    * @param keys
    * @param callback
    */
-  private listKeys (prefix: string, currentToken: any, keys: any, callback: any): void {
-    if (typeof callback === 'undefined') {
-      callback = keys;
-      keys = [];
-    }
-
-    this.blobService.listBlobsSegmentedWithPrefix(this.container, prefix, currentToken, (err, result, response) => {
-      if (err) {
-        return callback(new Error(err.name));
-      }
-      if (response.isSuccessful) {
-        result.entries.forEach((d) => {
-          keys.push(new Key(d.name.slice(this.path.length), false));
-        });
-
-        if (result.continuationToken) {
-          return this.listKeys(prefix, result.continuationToken, keys, callback);
+  private async listKeys (prefix: string, currentToken: any, keys: any): Promise<any> {
+    return new Promise((resolve, reject) => {
+      this.blobService.listBlobsSegmentedWithPrefix(this.container, prefix, currentToken, (err, result, response) => {
+        if (err) {
+          reject(new Error(err.name));
+          return;
         }
-      }
-
-      callback(err, keys);
-    });
+        if (response.isSuccessful) {
+          result.entries.forEach((d) => {
+            keys.push(new Key(d.name.slice(this.path.length), false));
+          });
+  
+          if (result.continuationToken) {
+            resolve(this.listKeys(prefix, result.continuationToken, keys));
+            return;
+          }
+        }
+  
+        resolve(keys)
+      });
+    })
   }
 
   /**
@@ -103,17 +103,15 @@ export default class AzureDataStore {
     let count: number = 0;
 
     return {
-      next: (callback: any) => {
+      next: async () => {
         if (count >= keys.length) {
-          return callback(null, null, null);
+          return null
         }
         let currentKey = keys[count++];
         if (keysOnly) {
-          return callback(null, currentKey, null);
+          return null
         }
-        this.get(currentKey, (err: any, data: any) => {
-          callback(err, currentKey, data);
-        });
+        return await this.get(currentKey);
       }
     };
   }
@@ -124,13 +122,18 @@ export default class AzureDataStore {
    * @param val
    * @param callback
    */
-  public put (key: any, val: Buffer, callback: any): void {
-    this.blobService.createBlockBlobFromText(this.container, this.getFullKey(key), val, (err, _result, _response) => {
-      if (err) {
-        return callback(Errors.dbWriteFailedError(err));
-      }
-      callback();
-    });
+  public async put (key: any, val: Buffer): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.blobService.createBlockBlobFromText(this.container, this.getFullKey(key), val, (err, _result, _response) => {
+        if (err) {
+          reject(Errors.dbWriteFailedError(err));
+          return;
+        }
+        resolve();
+        return;
+      });
+    })
+
   }
 
   /**
@@ -138,19 +141,24 @@ export default class AzureDataStore {
    * @param key
    * @param callback
    */
-  public get (key: any, callback: any): void {
+  public async get (key: any): Promise<any> {
     let writeStream: WritableMemoryStream = new WritableMemoryStream();
-    writeStream.on('finish', () => {
-      callback(null, writeStream.fetchData());
-    });
+    return new Promise((resolve, reject) => {
+      writeStream.on('finish', () => {
+        resolve(writeStream.fetchData());
+        return;
+      });
 
-    this.blobService.getBlobToStream(this.container, this.getFullKey(key), writeStream, (err, _result, _response) => {
-      if (err && err.message === 'NotFound') {
-        return callback(Errors.notFoundError(err));
-      } else if (err) {
-        return callback(err);
-      }
-    });
+      this.blobService.getBlobToStream(this.container, this.getFullKey(key), writeStream, (err, _result, _response) => {
+        if (err && err.message === 'NotFound') {
+          reject(Errors.notFoundError(err));
+          return;
+        } else if (err) {
+          reject(err);
+          return;
+        }
+      });
+    })
   }
 
   /**
@@ -158,16 +166,21 @@ export default class AzureDataStore {
    * @param key
    * @param callback
    */
-  public has (key: any, callback: any): void {
-    this.blobService.doesBlobExist(this.container, this.getFullKey(key), (err, result, _response) => {
-      if (err) {
-        callback(err, false);
-      } else if (result && result.exists) {
-        callback(null, true);
-      } else {
-        callback(null, false);
-      }
-    });
+  public async has (key: any): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+      this.blobService.doesBlobExist(this.container, this.getFullKey(key), (err, result, _response) => {
+        if (err) {
+          reject(err);
+          return;
+        } else if (result && result.exists) {
+          resolve(true);
+          return;
+        } else {
+          resolve(false);
+          return;
+        }
+      });
+    })
   }
 
   /**
@@ -175,50 +188,24 @@ export default class AzureDataStore {
    * @param key
    * @param callback
    */
-  public delete (key: any, callback: any): void {
-    this.blobService.deleteBlobIfExists(this.container, this.getFullKey(key), (err, _result, _response) => {
-      if (err) {
-        return callback(Errors.dbDeleteFailedError(err));
-      }
-      callback();
-    });
-  }
-
-  /**
-   * Creates a new batch object
-   */
-  public batch (): any {
-    let puts = [
-      {
-        key: '',
-        value: Buffer.from('')
-      }];
-    let deletes: any = [];
-    return {
-      put (key: any, value: any): void {
-        puts.push({ key: key, value: value });
-      },
-      delete (key: any): void {
-        deletes.push(key);
-      },
-      commit: (callback: any) => {
-        waterfall([
-          (cb: any) => each(puts, (p: any, _cb: any) => {
-            this.put(p.key, p.value, _cb);
-          }, cb),
-          (cb: any) => each(deletes, (key: any, _cb: any) => {
-            this.delete(key, _cb);
-          }, cb)
-        ], (err: any) => callback(err));
-      }
-    };
+  public delete (key: any): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.blobService.deleteBlobIfExists(this.container, this.getFullKey(key), (err, _result, _response) => {
+        if (err) {
+          reject(Errors.dbDeleteFailedError(err));
+          return;
+        }
+        resolve();
+        return;
+      });
+    })
   }
 
   /**
    * Query the azure blob storage
    * @param q
    */
-  public query (q: any): any {
+  public async  query (q: any): Promise<any> {
     const prefix = path.join(this.path, q.prefix || '');
 
     let deferred = DEFERRED.source();
@@ -248,14 +235,13 @@ export default class AzureDataStore {
       });
     };
 
-    this.listKeys(prefix, null, [], (err: any, keys: any) => {
-      if (err) {
-        return deferred.abort(err);
-      }
-
+    try {
+      const keys = await this.listKeys(prefix, null, []);
       iterator = this.getBlobIterator(keys, q.keysOnly || false);
       deferred.resolve(rawStream);
-    });
+    } catch (err) {
+      deferred.abort(err);
+    }
 
     // Use a deferred pull stream source, as async operations need to occur before the
     // pull stream begins
@@ -285,24 +271,28 @@ export default class AzureDataStore {
    * This will check the blob storage for container's access and existence
    * @param callback
    */
-  public open (callback: any): void {
-    this.blobService.doesBlobExist(this.container, this.path, (err, _result, response) => {
-      if (err) {
-        return callback(Errors.dbOpenFailedError(err));
-      }
-      if (response.statusCode === 404) {
-        return this.put(new Key('/', false), Buffer.from(''), callback);
-      }
+  public async open (): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.blobService.doesBlobExist(this.container, this.path, async (err, _result, response) => {
+        if (err) {
+         reject(Errors.dbOpenFailedError(err));
+         return;
+        }
+        if (response.statusCode === 404) {
+          await this.put(new Key('/', false), Buffer.from(''));
+        }
 
-      callback();
-    });
+        console.log('Azure data store opened.')
+        resolve();
+      });
+    })
+
   }
 
   /**
    * Close the store.
-   * @param callback
    */
-  public close (callback: any): void {
-    setImmediate(callback);
+  public async close (): Promise<void> {
+    console.log('Azure data store closed.');
   }
 }

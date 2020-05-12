@@ -23,7 +23,7 @@
     "async": "^2.6.1",
     "azure-storage": "^2.10.2",
     "datastore-core": "~0.6.0",
-    "interface-datastore": "~0.6.0",
+    "interface-datastore": "1.0.2",
     "pull-defer": "~0.2.3",
     "pull-stream": "^3.6.9",
     "upath": "^1.1.0"

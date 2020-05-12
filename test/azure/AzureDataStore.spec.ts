@@ -29,32 +29,36 @@ describe('AzureDataStore', () => {
   });
 
   describe('put', () => {
-    it('should include the path in the key', (done) => {
+    it('should include the path in the key', async (done) => {
       standin.replace(blobStore.getBlobService(), 'createBlockBlobFromText', (stand, _name, key, _value, callback) => {
         expect(key).toEqual('.ipfs/datastore/z/key');
         stand.restore();
         callback(null);
+        done();
       });
 
-      blobStore.put(new Key('/z/key'), Buffer.from('test data'), done);
+      await blobStore.put(new Key('/z/key'), Buffer.from('test data'));
     });
 
-    it('should return a standard error when the put fails', (done) => {
+    it('should return a standard error when the put fails', async (done) => {
       standin.replace(blobStore.getBlobService(), 'createBlockBlobFromText', (stand, _name, key, _value, callback) => {
         expect(key).toEqual('.ipfs/datastore/z/key');
         stand.restore();
         callback(new Error('bad things happened'));
       });
 
-      blobStore.put(new Key('/z/key'), Buffer.from('test data'), (err) => {
+      try {
+        await blobStore.put(new Key('/z/key'), Buffer.from('test data'));
+        fail('expected to throw but did not');
+      } catch (err) {
         expect(err.code).toEqual('ERR_DB_WRITE_FAILED');
         done();
-      });
+      }
     });
   });
 
   describe('get', () => {
-    it('should include the path in the fetch key', (done) => {
+    it('should include the path in the fetch key', async (done) => {
       let writeStream = new WritableMemoryStream();
 
       standin.replace(blobStore.getBlobService(), 'getBlobToStream', (stand, _name, key, writeStream, callback) => {
@@ -64,10 +68,10 @@ describe('AzureDataStore', () => {
         done();
       });
 
-      blobStore.get(new Key('/z/key'), done);
+      await blobStore.get(new Key('/z/key'));
     });
 
-    it('should return a standard not found error code if the key isnt found', (done) => {
+    it('should return a standard not found error code if the key is not found', async (done) => {
       standin.replace(blobStore.getBlobService(), 'getBlobToStream', (stand, _name, key, _writeStream, callback) => {
         expect(key).toEqual('.ipfs/datastore/z/key');
         stand.restore();
@@ -75,39 +79,48 @@ describe('AzureDataStore', () => {
         callback(error, null, { statusCode: 404 });
       });
 
-      blobStore.get(new Key('/z/key'), (err) => {
+      try {
+        await blobStore.get(new Key('/z/key'));
+        fail('expected to throw but did not');
+      } catch (err) {
         expect(err.code).toEqual('ERR_NOT_FOUND');
         done();
-      });
+      }
     });
   });
 
   describe('delete', () => {
-    it('should return a standard delete error if deletion fails', (done) => {
+    it('should return a standard delete error if deletion fails', async (done) => {
       standin.replace(blobStore.getBlobService(), 'deleteBlobIfExists', (stand, _name, key, callback) => {
         expect(key).toEqual('.ipfs/datastore/z/key');
         stand.restore();
         callback(new Error('bad things'));
       });
 
-      blobStore.delete(new Key('/z/key'), (err) => {
+      try {
+        await blobStore.delete(new Key('/z/key'));
+        fail('expected to throw but did not');
+      } catch (err) {
         expect(err.code).toEqual('ERR_DB_DELETE_FAILED');
         done();
-      });
+      }
     });
   });
 
   describe('open', () => {
-    it('should return a standard open error if blob exist check fails', (done) => {
+    it('should return a standard open error if blob exist check fails', async (done) => {
       standin.replace(blobStore.getBlobService(), 'doesBlobExist', (stand, _name, _key, callback) => {
         stand.restore();
         callback(new Error('unknown'));
       });
 
-      blobStore.open((err) => {
+      try {
+        await blobStore.open();
+        fail('expected to throw but did not');
+      } catch (err) {
         expect(err.code).toEqual('ERR_DB_OPEN_FAILED');
         done();
-      });
+      }
     });
   });
 });
