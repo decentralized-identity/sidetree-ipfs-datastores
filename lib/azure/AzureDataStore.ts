@@ -140,7 +140,6 @@ export default class AzureDataStore {
    */
   public get (key: any, callback: any): void {
     let writeStream: WritableMemoryStream = new WritableMemoryStream();
-
     writeStream.on('finish', () => {
       callback(null, writeStream.fetchData());
     });
