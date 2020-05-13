@@ -73,47 +73,38 @@ export default class AzureDataStore extends iDatastore.Adapter {
    */
   private async listKeys (prefix: string, currentToken: any, keys: any): Promise<any> {
     return new Promise((resolve, reject) => {
-      this.blobService.listBlobsSegmentedWithPrefix(this.container, prefix, currentToken, (err, result, response) => {
+      this.blobService.listBlobsSegmentedWithPrefix(this.container, prefix, currentToken, async (err, result, response) => {
         if (err) {
           reject(new Error(err.name));
           return;
         }
         if (response.isSuccessful) {
           result.entries.forEach((d) => {
+            const testing = d.name.slice(this.path.length);
             keys.push(new Key(d.name.slice(this.path.length), false));
           });
-  
+
           if (result.continuationToken) {
-            resolve(this.listKeys(prefix, result.continuationToken, keys));
+            await this.listKeys(prefix, result.continuationToken, keys);
+            resolve(keys);
             return;
           }
         }
-  
-        resolve(keys)
+
+        resolve(keys);
       });
-    })
+    });
   }
 
   /**
-   * Returns an iterator for fetching objects from azure by their key
-   * @param keys
-   * @param keysOnly Whether or not only keys should be returned
+   * returns an asyncIterator that yields all the keys and values in the store
    */
-  private getBlobIterator (keys: any, keysOnly: boolean): any {
-    let count: number = 0;
-
-    return {
-      next: async () => {
-        if (count >= keys.length) {
-          return null
-        }
-        let currentKey = keys[count++];
-        if (keysOnly) {
-          return null
-        }
-        return await this.get(currentKey);
-      }
-    };
+  private async * _all () {
+    const keys = await this.listKeys('', null, []);
+    for (const key of keys) {
+      const value = await this.get(key);
+      yield {key: key, value: value};
+    }
   }
 
   /**
@@ -132,7 +123,7 @@ export default class AzureDataStore extends iDatastore.Adapter {
         resolve();
         return;
       });
-    })
+    });
 
   }
 
@@ -158,7 +149,7 @@ export default class AzureDataStore extends iDatastore.Adapter {
           return;
         }
       });
-    })
+    });
   }
 
   /**
@@ -180,7 +171,7 @@ export default class AzureDataStore extends iDatastore.Adapter {
           return;
         }
       });
-    })
+    });
   }
 
   /**
@@ -198,73 +189,7 @@ export default class AzureDataStore extends iDatastore.Adapter {
         resolve();
         return;
       });
-    })
-  }
-
-  /**
-   * Query the azure blob storage
-   * @param q
-   */
-  public async  query (q: any): Promise<any> {
-    const prefix = path.join(this.path, q.prefix || '');
-
-    let deferred = DEFERRED.source();
-    let iterator: any;
-
-    const rawStream = (end: any, callback: any) => {
-      if (end) {
-        return callback(end);
-      }
-      iterator.next((err: any, key: any, value: any) => {
-        if (err) {
-          return callback(err);
-        }
-        if (err === null && key === null && value === null) {
-          return callback(true);
-        }
-
-        const res = {
-          key: key,
-          value: Buffer.from('')
-        };
-
-        if (value) {
-          res.value = value;
-        }
-        callback(null, res);
-      });
-    };
-
-    try {
-      const keys = await this.listKeys(prefix, null, []);
-      iterator = this.getBlobIterator(keys, q.keysOnly || false);
-      deferred.resolve(rawStream);
-    } catch (err) {
-      deferred.abort(err);
-    }
-
-    // Use a deferred pull stream source, as async operations need to occur before the
-    // pull stream begins
-    let tasks = [deferred];
-
-    if (q.filters != null) {
-      tasks = tasks.concat(q.filters.map((f: any) => asyncFilter(f)));
-    }
-
-    if (q.orders != null) {
-      tasks = tasks.concat(q.orders.map((o: any) => asyncSort(o)));
-    }
-
-    if (q.offset != null) {
-      let i = 0;
-      tasks.push(pull.filter(() => i++ >= q.offset));
-    }
-
-    if (q.limit != null) {
-      tasks.push(pull.take(q.limit));
-    }
-
-    return pull.apply(null, tasks);
+    });
   }
 
   /**
@@ -275,18 +200,17 @@ export default class AzureDataStore extends iDatastore.Adapter {
     return new Promise((resolve, reject) => {
       this.blobService.doesBlobExist(this.container, this.path, async (err, _result, response) => {
         if (err) {
-         reject(Errors.dbOpenFailedError(err));
-         return;
+          reject(Errors.dbOpenFailedError(err));
+          return;
         }
         if (response.statusCode === 404) {
           await this.put(new Key('/', false), Buffer.from(''));
         }
 
-        console.log('Azure data store opened.')
+        console.log('Azure data store opened.');
         resolve();
       });
-    })
-
+    });
   }
 
   /**

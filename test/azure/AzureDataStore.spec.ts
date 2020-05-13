@@ -107,6 +107,77 @@ describe('AzureDataStore', () => {
     });
   });
 
+  describe('has', () => {
+    it('should return true if found', async () => {
+      standin.replace(blobStore.getBlobService(), 'doesBlobExist', (stand, _name, _key, callback) => {
+        stand.restore();
+        callback(undefined, { exists: true });
+      });
+
+      const result = await blobStore.has('something');
+      expect(result).toBeTruthy();
+    });
+
+    it('should return false if not found', async () => {
+      standin.replace(blobStore.getBlobService(), 'doesBlobExist', (stand, _name, _key, callback) => {
+        stand.restore();
+        callback(undefined, { exists: false });
+      });
+
+      const result = await blobStore.has('something');
+      expect(result).toBeFalsy();
+    });
+
+    it('should return false if not result', async () => {
+      standin.replace(blobStore.getBlobService(), 'doesBlobExist', (stand, _name, _key, callback) => {
+        stand.restore();
+        callback(undefined, undefined);
+      });
+
+      const result = await blobStore.has('something');
+      expect(result).toBeFalsy();
+    });
+
+    it('should throw error on error', async () => {
+      standin.replace(blobStore.getBlobService(), 'doesBlobExist', (stand, _name, _key, callback) => {
+        stand.restore();
+        callback(new Error('error for testing'));
+      });
+
+      try {
+        const result = await blobStore.has('something');
+        fail('expect to throw but did not');
+      } catch (e) {
+        expect(e.message).toEqual('error for testing');
+      }
+    });
+  });
+
+  describe('_all', () => {
+    it('should return an async iterator over all keys and values', async () => {
+      standin.replace(blobStore.getBlobService(), 'listBlobsSegmentedWithPrefix', (stand, _container, _prefix, currentToken, callback) => {
+        if (currentToken === 'end') {
+          stand.restore();
+          callback(undefined, { entries: [{ name: '.ipfs/datastore/key2' }] }, { isSuccessful: true });
+        } else {
+          callback(undefined, { entries: [{ name: '.ipfs/datastore/key1' }], continuationToken: 'end' }, { isSuccessful: true });
+        }
+      });
+      spyOn(blobStore, 'get').and.callFake(() => {
+        return Buffer.from('value');
+      });
+
+      const results = blobStore['_all'](); // this is an iterator
+      const expected = [{ key: new Key('/key1'), value: Buffer.from('value') }, { key: new Key('/key2'), value: Buffer.from('value') }];
+      let indexCounter = 0;
+      // tslint:disable-next-line: await-promise
+      for await (const result of results) {
+        expect(result).toEqual(expected[indexCounter]);
+        indexCounter++;
+      }
+    });
+  });
+
   describe('open', () => {
     it('should return a standard open error if blob exist check fails', async (done) => {
       standin.replace(blobStore.getBlobService(), 'doesBlobExist', (stand, _name, _key, callback) => {
