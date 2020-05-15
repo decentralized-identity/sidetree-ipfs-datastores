@@ -1,42 +1,36 @@
+import { ILock } from './interfaces/ILock';
+
 /**
  * Mock Lock class to be used for creating IPFS repo.
  */
-export default class MockLock {
-
-  /**
-   * Returns the lock file path name
-   */
-  private getLockFilePath (): void {
-    return;
-  }
+export default class MockLock implements ILock {
 
   /**
    * Creates the lock.
    * @param dir {string} Path to the folder where to create lock.
-   * @param callback {Function(Error, LockCloser)}
    */
-  public lock (_, callback: any): void {
-    callback(null, this.getCloser(_));
+  public lock (dir: string): any {
+    console.log(`lock was called on ${dir}`);
+    return this.getCloser();
   }
 
   /**
    * Returns a LockCloser, which has a `close` method for rmeoving the lock located at `lockPath`
-   * @param lockPath {string} Path to repo lock.
    */
-  public getCloser (_) {
+  public getCloser () {
     return {
-      close: (cb) => {
-        cb();
-      }
+      close: () => { console.log('lock closed'); }
     };
   }
 
   /**
    * Checks whether or not a lock exists.
    * @param dir {string} LockFile path
-   * @param callback {Function(Error, boolean)}
    */
-  public locked (_, callback: any): void {
-    callback(null, false);
+  public locked (dir: string): Promise<boolean> {
+    console.log(` ${dir} is not locked`);
+    return new Promise((resolve) => {
+      resolve(false);
+    });
   }
 }
