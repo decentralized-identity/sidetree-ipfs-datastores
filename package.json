@@ -1,6 +1,6 @@
 {
   "name": "@decentralized-identity/sidetree-ipfs-datastores",
-  "version": "0.1.5",
+  "version": "1.0.0",
   "description": "Implementations of IPFS datastore used by sidetree-ipfs microservice",
   "repository": "https://github.com/decentralized-identity/sidetree-ipfs-datastores",
   "main": "dist/lib/index.js",
