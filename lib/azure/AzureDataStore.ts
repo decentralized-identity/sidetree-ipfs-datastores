@@ -97,7 +97,7 @@ export default class AzureDataStore extends Adapter implements IDataStore {
   /**
    * batch function using the adapter internal implementation
    */
-  public batch (): any {
+  public batch () {
     return super.batch();
   }
 

@@ -1,5 +1,5 @@
 /**
- * an interface for data store to implement. This is the same interface as interface-datastore, 
+ * an interface for data store to implement. This is the same interface as interface-datastore,
  * we have this because at the moment on this implementation, the type definition in the library is no working
  */
 export default interface IDataStore {
