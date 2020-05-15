@@ -1,6 +1,6 @@
 {
   "name": "@decentralized-identity/sidetree-ipfs-datastores",
-  "version": "0.1.5",
+  "version": "0.3.0",
   "description": "Implementations of IPFS datastore used by sidetree-ipfs microservice",
   "repository": "https://github.com/decentralized-identity/sidetree-ipfs-datastores",
   "main": "dist/lib/index.js",
@@ -29,10 +29,12 @@
     "upath": "^1.1.0"
   },
   "devDependencies": {
-    "@types/node": "^10.3.1",
+    "@types/dotenv": "^4.0.3",
     "@types/jasmine": "^2.8.8",
+    "@types/node": "^10.3.1",
     "chai": "^4.1.2",
     "dirty-chai": "^2.0.1",
+    "dotenv": "^6.0.0",
     "jasmine": "^3.1.0",
     "jasmine-reporters": "^2.3.2",
     "jasmine-spec-reporter": "^4.2.1",
@@ -41,8 +43,6 @@
     "stand-in": "^4.2.0",
     "tslint": "^5.11.0",
     "tslint-config-standard": "^8.0.1",
-    "@types/dotenv": "^4.0.3",
-    "dotenv": "^6.0.0",
     "typescript": "^3.0.3"
   },
   "author": "",

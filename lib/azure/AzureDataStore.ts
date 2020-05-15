@@ -1,7 +1,12 @@
 import * as storage from 'azure-storage';
 import * as path from 'upath';
+import IDataStore from './interfaces/IDataStore';
 import WritableMemoryStream from './WritableMemoryStream';
-import { Key, Errors, Adapter } from 'interface-datastore';
+
+const interfaceDatastore = require('interface-datastore');
+const Adapter = interfaceDatastore.Adapter;
+const Key = interfaceDatastore.Key;
+const Errors = interfaceDatastore.Errors;
 
 /**
  * Structure for input params for Azure Data store
@@ -16,7 +21,7 @@ export type AzureDSInputOptions = {
 /**
  * Azure data store class that implements interface-datastore's adapter
  */
-export default class AzureDataStore extends Adapter {
+export default class AzureDataStore extends Adapter implements IDataStore {
   private path: string;
   private blobService: storage.BlobService;
   private container: string;
@@ -80,6 +85,20 @@ export default class AzureDataStore extends Adapter {
         }
       });
     });
+  }
+
+  /**
+   * Query function using adapter internal implementation
+   */
+  public query (q: any) {
+    return super.query(q);
+  }
+
+  /**
+   * batch function using the adapter internal implementation
+   */
+  public batch (): any {
+    return super.batch();
   }
 
   /**
