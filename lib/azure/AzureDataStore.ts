@@ -72,7 +72,7 @@ export default class AzureDataStore extends Adapter implements IDataStore {
           return;
         }
         if (response.isSuccessful) {
-          const keys = [];
+          const keys:any[] = [];
           result.entries.forEach((d) => {
             keys.push(new Key(d.name.slice(this.path.length), false));
           });
@@ -109,7 +109,7 @@ export default class AzureDataStore extends Adapter implements IDataStore {
     console.warn('_all is being called by ipfs, this is inefficient and should not happen often');
     let continuationToken = null;
     do {
-      const listKeysResult = await this.listKeys('', continuationToken);
+      const listKeysResult: any = await this.listKeys('', continuationToken);
       const keys = listKeysResult.keys;
       for (const key of keys) {
         const value = await this.get(key);

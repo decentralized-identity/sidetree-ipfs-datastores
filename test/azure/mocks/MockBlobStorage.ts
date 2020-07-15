@@ -2,10 +2,10 @@ const standin = require('stand-in');
 
 class BlobStorageError extends Error {
   /** Error code. */
-  public code;
+  public code:any;
   /** Error status code. */
-  public statusCode;
-  constructor (message, code) {
+  public statusCode:any;
+  constructor (message:any, code:any) {
     super(message);
     this.code = message;
     this.statusCode = code;
@@ -17,11 +17,11 @@ class BlobStorageError extends Error {
  * @param {blobService} blobService
  * @returns {void}
  */
-module.exports = (blobService) => {
+module.exports = (blobService:any) => {
   const mocks: any = {};
   const storage: any = {};
 
-  mocks.deleteContainerIfExists = standin.replace(blobService, 'deleteContainerIfExists', (_stand, key, callback) => {
+  mocks.deleteContainerIfExists = standin.replace(blobService, 'deleteContainerIfExists', (_stand:any, key:any, callback:any) => {
     if (storage[key]) {
       delete storage[key];
       callback(null, {});
@@ -30,7 +30,7 @@ module.exports = (blobService) => {
     }
   });
 
-  mocks.getBlobToText = standin.replace(blobService, 'getBlobToText', (_stand, _name, key, _options, callback) => {
+  mocks.getBlobToText = standin.replace(blobService, 'getBlobToText', (_stand:any, _name:any, key:any, _options:any, callback:any) => {
     if (storage[key]) {
       callback(null, { Body: storage[key] });
     } else {
@@ -38,7 +38,7 @@ module.exports = (blobService) => {
     }
   });
 
-  mocks.doesBlobExist = standin.replace(blobService, 'doesBlobExist', (_standin, _name, key, callback) => {
+  mocks.doesBlobExist = standin.replace(blobService, 'doesBlobExist', (_standin:any, _name:any, key:any, callback:any) => {
     if (storage[key]) {
       callback(null, {});
     } else {
@@ -46,9 +46,10 @@ module.exports = (blobService) => {
     }
   });
 
-  mocks.listBlobsSegmentedWithPrefix = standin.replace(blobService, 'listBlobsSegmentedWithPrefix', (_standin, _name, prefix, _token, callback) => {
+  mocks.listBlobsSegmentedWithPrefix = standin.replace(blobService, 'listBlobsSegmentedWithPrefix', (_standin:any, _name:any, prefix:any, _token:any, callback:any) => {
+    const content: any[] = []
     const results = {
-      Contents: []
+      Contents: content 
     };
 
     for (let k in storage) {
@@ -62,7 +63,7 @@ module.exports = (blobService) => {
     callback(null, results);
   });
 
-  mocks.createBlockBlobFromText = standin.replace(blobService, 'createBlockBlobFromText', (_stand, _name, key, value, callback) => {
+  mocks.createBlockBlobFromText = standin.replace(blobService, 'createBlockBlobFromText', (_stand:any, _name:any, key:any, value:any, callback:any) => {
     storage[key] = value;
     callback(null);
   });

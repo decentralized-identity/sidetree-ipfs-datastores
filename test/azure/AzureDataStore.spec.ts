@@ -30,7 +30,7 @@ describe('AzureDataStore', () => {
 
   describe('put', () => {
     it('should include the path in the key', async (done) => {
-      standin.replace(blobStore.getBlobService(), 'createBlockBlobFromText', (stand, _name, key, _value, callback) => {
+      standin.replace(blobStore.getBlobService(), 'createBlockBlobFromText', (stand: any, _name: any, key: any, _value:any, callback:any) => {
         expect(key).toEqual('.ipfs/datastore/z/key');
         stand.restore();
         callback(null);
@@ -41,7 +41,7 @@ describe('AzureDataStore', () => {
     });
 
     it('should return a standard error when the put fails', async (done) => {
-      standin.replace(blobStore.getBlobService(), 'createBlockBlobFromText', (stand, _name, key, _value, callback) => {
+      standin.replace(blobStore.getBlobService(), 'createBlockBlobFromText', (stand:any, _name:any, key:any, _value:any, callback:any) => {
         expect(key).toEqual('.ipfs/datastore/z/key');
         stand.restore();
         callback(new Error('bad things happened'));
@@ -61,7 +61,7 @@ describe('AzureDataStore', () => {
     it('should include the path in the fetch key', async (done) => {
       let writeStream = new WritableMemoryStream();
 
-      standin.replace(blobStore.getBlobService(), 'getBlobToStream', (stand, _name, key, writeStream, callback) => {
+      standin.replace(blobStore.getBlobService(), 'getBlobToStream', (stand:any, _name:any, key:any, writeStream:any, callback:any) => {
         expect(key).toEqual('.ipfs/datastore/z/key');
         stand.restore();
         callback(null, Buffer.from('test'), { statusCode: 200 });
@@ -72,7 +72,7 @@ describe('AzureDataStore', () => {
     });
 
     it('should return a standard not found error code if the key is not found', async (done) => {
-      standin.replace(blobStore.getBlobService(), 'getBlobToStream', (stand, _name, key, _writeStream, callback) => {
+      standin.replace(blobStore.getBlobService(), 'getBlobToStream', (stand:any, _name:any, key:any, _writeStream:any, callback:any) => {
         expect(key).toEqual('.ipfs/datastore/z/key');
         stand.restore();
         let error = new Error('NotFound');
@@ -91,7 +91,7 @@ describe('AzureDataStore', () => {
 
   describe('delete', () => {
     it('should return a standard delete error if deletion fails', async (done) => {
-      standin.replace(blobStore.getBlobService(), 'deleteBlobIfExists', (stand, _name, key, callback) => {
+      standin.replace(blobStore.getBlobService(), 'deleteBlobIfExists', (stand:any, _name:any, key:any, callback:any) => {
         expect(key).toEqual('.ipfs/datastore/z/key');
         stand.restore();
         callback(new Error('bad things'));
@@ -109,7 +109,7 @@ describe('AzureDataStore', () => {
 
   describe('has', () => {
     it('should return true if found', async () => {
-      standin.replace(blobStore.getBlobService(), 'doesBlobExist', (stand, _name, _key, callback) => {
+      standin.replace(blobStore.getBlobService(), 'doesBlobExist', (stand:any, _name:any, _key:any, callback:any) => {
         stand.restore();
         callback(undefined, { exists: true });
       });
@@ -119,7 +119,7 @@ describe('AzureDataStore', () => {
     });
 
     it('should return false if not found', async () => {
-      standin.replace(blobStore.getBlobService(), 'doesBlobExist', (stand, _name, _key, callback) => {
+      standin.replace(blobStore.getBlobService(), 'doesBlobExist', (stand:any, _name:any, _key:any, callback:any) => {
         stand.restore();
         callback(undefined, { exists: false });
       });
@@ -129,7 +129,7 @@ describe('AzureDataStore', () => {
     });
 
     it('should return false if not result', async () => {
-      standin.replace(blobStore.getBlobService(), 'doesBlobExist', (stand, _name, _key, callback) => {
+      standin.replace(blobStore.getBlobService(), 'doesBlobExist', (stand:any, _name:any, _key:any, callback:any) => {
         stand.restore();
         callback(undefined, undefined);
       });
@@ -139,7 +139,7 @@ describe('AzureDataStore', () => {
     });
 
     it('should throw error on error', async () => {
-      standin.replace(blobStore.getBlobService(), 'doesBlobExist', (stand, _name, _key, callback) => {
+      standin.replace(blobStore.getBlobService(), 'doesBlobExist', (stand:any, _name:any, _key:any, callback:any) => {
         stand.restore();
         callback(new Error('error for testing'));
       });
@@ -155,7 +155,7 @@ describe('AzureDataStore', () => {
 
   describe('_all', () => {
     it('should return an async iterator over all keys and values', async () => {
-      standin.replace(blobStore.getBlobService(), 'listBlobsSegmentedWithPrefix', (stand, _container, _prefix, currentToken, callback) => {
+      standin.replace(blobStore.getBlobService(), 'listBlobsSegmentedWithPrefix', (stand:any, _container:any, _prefix:any, currentToken:any, callback:any) => {
         if (currentToken === 'end') {
           stand.restore();
           callback(undefined, { entries: [{ name: '.ipfs/datastore/key2' }] }, { isSuccessful: true });
@@ -180,7 +180,7 @@ describe('AzureDataStore', () => {
 
   describe('open', () => {
     it('should return a standard open error if blob exist check fails', async (done) => {
-      standin.replace(blobStore.getBlobService(), 'doesBlobExist', (stand, _name, _key, callback) => {
+      standin.replace(blobStore.getBlobService(), 'doesBlobExist', (stand:any, _name:any, _key:any, callback:any) => {
         stand.restore();
         callback(new Error('unknown'));
       });
