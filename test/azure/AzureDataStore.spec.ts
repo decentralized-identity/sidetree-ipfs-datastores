@@ -158,9 +158,9 @@ describe('AzureDataStore', () => {
       standin.replace(blobStore.getBlobService(), 'listBlobsSegmentedWithPrefix', (stand, _container, _prefix, currentToken, callback) => {
         if (currentToken === 'end') {
           stand.restore();
-          callback(undefined, { entries: [{ name: '.ipfs/datastore/key2' }] }, { isSuccessful: true });
+          callback(undefined, { entries: [{ name: 'ipfs/datastore/key2' }] }, { isSuccessful: true });
         } else {
-          callback(undefined, { entries: [{ name: '.ipfs/datastore/key1' }], continuationToken: 'end' }, { isSuccessful: true });
+          callback(undefined, { entries: [{ name: 'ipfs/datastore/key1' }], continuationToken: 'end' }, { isSuccessful: true });
         }
       });
       spyOn(blobStore, 'get').and.callFake(() => {
@@ -179,8 +179,22 @@ describe('AzureDataStore', () => {
   });
 
   describe('open', () => {
+    it('should put root if 404', async (done) => {
+      standin.replace(blobStore.getBlobService(), 'doesBlobExist', (stand, _name, key, callback) => {
+        expect(key).toEqual('.ipfs/datastore/');
+        stand.restore();
+        callback(undefined, undefined, { statusCode: 404 });
+      });
+      const putSpy = spyOn(blobStore, 'put');
+
+      await blobStore.open();
+      expect(putSpy).toHaveBeenCalled();
+      done();
+    });
+
     it('should return a standard open error if blob exist check fails', async (done) => {
-      standin.replace(blobStore.getBlobService(), 'doesBlobExist', (stand, _name, _key, callback) => {
+      standin.replace(blobStore.getBlobService(), 'doesBlobExist', (stand, _name, key, callback) => {
+        expect(key).toEqual('.ipfs/datastore/');
         stand.restore();
         callback(new Error('unknown'));
       });

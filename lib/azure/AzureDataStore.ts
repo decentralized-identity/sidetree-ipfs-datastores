@@ -74,7 +74,9 @@ export default class AzureDataStore extends Adapter implements IDataStore {
         if (response.isSuccessful) {
           const keys = [];
           result.entries.forEach((d) => {
-            keys.push(new Key(d.name.slice(this.path.length), false));
+            // Key must start with /
+            // https://github.com/ipfs/interface-datastore/blob/master/src/key.js
+            keys.push(new Key(`/${d.name.slice(this.path.length)}`, false));
           });
 
           resolve({
@@ -205,7 +207,8 @@ export default class AzureDataStore extends Adapter implements IDataStore {
    */
   public async open (): Promise<void> {
     return new Promise((resolve, reject) => {
-      this.blobService.doesBlobExist(this.container, this.path, async (err, _result, response) => {
+      // test if root as a key exists
+      this.blobService.doesBlobExist(this.container, this.getFullKey('/'), async (err, _result, response) => {
         if (err) {
           reject(Errors.dbOpenFailedError(err));
           return;
