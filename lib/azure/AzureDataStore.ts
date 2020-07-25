@@ -106,6 +106,7 @@ export default class AzureDataStore extends Adapter implements IDataStore {
   /**
    * returns an asyncIterator that yields all the keys and values in the store
    */
+  //@ts-ignore TS6133: '_all' is declared but its value is never read. 
   private async * _all () {
     // log when this is being called so we know this is not happening too much
     console.warn('_all is being called by ipfs, this is inefficient and should not happen often');

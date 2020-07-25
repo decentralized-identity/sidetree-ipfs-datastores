@@ -5,10 +5,8 @@ const chai = require('chai');
 chai.use(require('dirty-chai'));
 const Key = require('interface-datastore').Key;
 import * as storage from 'azure-storage';
-const blobServiceMock = require('./mocks/MockBlobStorage');
 const standin = require('stand-in');
 import { AzureDataStore } from '../../lib/index';
-import WritableMemoryStream from '../../lib/azure/WritableMemoryStream';
 
 describe('AzureDataStore', () => {
   const containerName = 'ipfscontainer';
@@ -59,9 +57,8 @@ describe('AzureDataStore', () => {
 
   describe('get', () => {
     it('should include the path in the fetch key', async (done) => {
-      let writeStream = new WritableMemoryStream();
 
-      standin.replace(blobStore.getBlobService(), 'getBlobToStream', (stand, _name, key, writeStream, callback) => {
+      standin.replace(blobStore.getBlobService(), 'getBlobToStream', (stand, _name, key, _writeStream, callback) => {
         expect(key).toEqual('.ipfs/datastore/z/key');
         stand.restore();
         callback(null, Buffer.from('test'), { statusCode: 200 });
@@ -145,7 +142,7 @@ describe('AzureDataStore', () => {
       });
 
       try {
-        const result = await blobStore.has('something');
+        await blobStore.has('something');
         fail('expect to throw but did not');
       } catch (e) {
         expect(e.message).toEqual('error for testing');
