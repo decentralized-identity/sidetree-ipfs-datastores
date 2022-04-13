@@ -20,7 +20,7 @@
     "dist/lib/**/*"
   ],
   "dependencies": {
-    "async": "^2.6.1",
+    "async": "^3.2.2",
     "azure-storage": "^2.10.2",
     "datastore-core": "~0.6.0",
     "interface-datastore": "1.0.2",
