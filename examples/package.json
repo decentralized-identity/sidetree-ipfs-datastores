@@ -16,7 +16,7 @@
         "azure-storage": "^2.10.2",
         "@decentralized-identity/sidetree-ipfs-datastores": "../",
         "dotenv": "^5.0.0",
-        "ipfs": "^0.34.4",
+        "ipfs": "^0.65.0",
         "ipfs-repo": "^0.26.2"
     },
     "devDependencies": {
